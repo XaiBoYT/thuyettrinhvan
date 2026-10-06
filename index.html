@@ -686,13 +686,15 @@ s.querySelectorAll('[data-t]').forEach((e,k)=>scr(e,e.dataset.t.replace(/\|/g,'\
 updateStrip();upd()}
 function next(){if(step<steps.length){reveal(steps[step++]);upd()}else if(cur<N-1)go(cur+1,false)}
 function prev(){if(step>0){steps[--step].classList.remove('v');upd()}else if(cur>0)go(cur-1,true)}
-addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();next()}else if(e.key==='ArrowLeft'){e.preventDefault();prev()}else if(e.key==='f'||e.key==='F')document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()});
+function isLocked(){const l=document.getElementById('lock');return !!l&&!l.classList.contains('hide')}
+addEventListener('keydown',e=>{if(isLocked())return;if(e.key==='ArrowRight'){e.preventDefault();next()}else if(e.key==='ArrowLeft'){e.preventDefault();prev()}else if(e.key==='f'||e.key==='F')document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()});
 st.addEventListener('click',e=>{
+  if(isLocked())return;
   const strip=$('#slide-strip');
   if(strip.classList.contains('open')){strip.classList.remove('open');$('#strip-btn').classList.remove('open');return}
   e.clientX<innerWidth/2?prev():next()
 });
-let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});addEventListener('touchend',e=>{if(e.target.closest&&e.target.closest('#slide-strip'))return;if(e.changedTouches[0].clientX-tx>80){prev();e.preventDefault()}});
+let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});addEventListener('touchend',e=>{if(isLocked())return;if(e.target.closest&&e.target.closest('#slide-strip'))return;if(e.changedTouches[0].clientX-tx>80){prev();e.preventDefault()}});
 let mx=0,my=0,mp=0;addEventListener('mousemove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(!mp){mp=1;requestAnimationFrame(()=>{wm.style.transform=`translate(${mx*-30}px,${my*-20}px)`;mp=0})}},{passive:true});
 // particles
 const cv=$('#cv'),cx=cv.getContext('2d'),SP=document.createElement('canvas');SP.width=SP.height=64;
@@ -738,6 +740,7 @@ function updateStrip(){
 }
 stripBtn.addEventListener('click',e=>{
   e.stopPropagation();
+  if(isLocked())return;
   const open=strip.classList.toggle('open');
   stripBtn.classList.toggle('open',open);
   if(open&&stripInner.children.length===0)buildStrip();
@@ -799,7 +802,7 @@ go(0,false);
         btn=document.getElementById('pwBtn'),msg=document.getElementById('pwMsg'),
         box=document.querySelector('.lock-box');
   function check(){
-    if(pw.value.trim().toLowerCase()==='to3'){
+    if(btoa(pw.value.trim().toLowerCase())==='dG8z'){
       lock.classList.add('hide');setTimeout(()=>lock.remove(),600);
     }else{
       msg.textContent='Không có mật mã thì cúttttt!';
